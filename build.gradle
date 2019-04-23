@@ -1,20 +1,87 @@
-allprojects {
-    repositories {
-        google()
-        jcenter()
+apply plugin: 'com.android.library'
+apply from: 'nonnull.gradle'
+
+// Create a variable called keystorePropertiesFile, and initialize it to your
+// keystore.properties file, in the rootProject folder.
+final def keystorePropertiesFile = rootProject.file("keystore.properties")
+
+android {
+    buildToolsVersion '28.0.3'
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+    }
+    compileSdkVersion 28
+    dataBinding.enabled true
+    defaultConfig {
+        minSdkVersion 21
+        targetSdkVersion 28
+        versionCode 449
+        versionName '0.0.20190319'
+        buildConfigField 'int', 'MIN_SDK_VERSION', "$minSdkVersion.apiLevel"
+    }
+    // If the keystore file exists
+    if (keystorePropertiesFile.exists()) {
+        // Initialize a new Properties() object called keystoreProperties.
+        final def keystoreProperties = new Properties()
+
+        // Load your keystore.properties file into the keystoreProperties object.
+        keystoreProperties.load(new FileInputStream(keystorePropertiesFile))
+
+        signingConfigs {
+            release {
+                keyAlias keystoreProperties['keyAlias']
+                keyPassword keystoreProperties['keyPassword']
+                storeFile file(keystoreProperties['storeFile'])
+                storePassword keystoreProperties['storePassword']
+            }
+        }
+    }
+    buildTypes {
+        release {
+            if (keystorePropertiesFile.exists()) signingConfig signingConfigs.release
+            minifyEnabled true
+            proguardFiles getDefaultProguardFile("proguard-android.txt"), "proguard-rules.pro"
+        }
+        debug {
+            versionNameSuffix "-debug"
+        }
+    }
+    externalNativeBuild {
+        cmake {
+            path 'tools/CMakeLists.txt'
+        }
     }
 }
 
-buildscript {
-    dependencies {
-        classpath 'com.android.tools.build:gradle:3.3.1'
-    }
-    repositories {
-        google()
-        jcenter()
-    }
+ext {
+    annotationsVersion = '1.0.1'
+    appcompatVersion = '1.0.2'
+    cardviewVersion = '1.0.0'
+    databindingVersion = '3.3.1'
+    materialComponentsVersion = '1.0.0'
+    jsr305Version = '3.0.2'
+    preferenceVersion = '1.0.0'
+    streamsupportVersion = '1.7.0'
+    threetenabpVersion = '1.1.1'
+    zxingEmbeddedVersion = '3.6.0'
 }
 
-task clean(type: Delete) {
-    delete rootProject.buildDir
+dependencies {
+    implementation "androidx.annotation:annotation:$annotationsVersion"
+    implementation "androidx.appcompat:appcompat:$appcompatVersion"
+    implementation "androidx.cardview:cardview:$cardviewVersion"
+    implementation "androidx.databinding:databinding-runtime:$databindingVersion"
+    implementation "androidx.preference:preference:$preferenceVersion"
+    implementation "com.google.android.material:material:$materialComponentsVersion"
+    implementation "com.google.code.findbugs:jsr305:$jsr305Version"
+    implementation "com.jakewharton.threetenabp:threetenabp:$threetenabpVersion"
+    implementation "com.journeyapps:zxing-android-embedded:$zxingEmbeddedVersion"
+    implementation "net.sourceforge.streamsupport:android-retrofuture:$streamsupportVersion"
+    implementation "net.sourceforge.streamsupport:android-retrostreams:$streamsupportVersion"
+}
+
+tasks.withType(JavaCompile) {
+    options.compilerArgs << '-Xlint:unchecked'
+    options.deprecation = true
 }
