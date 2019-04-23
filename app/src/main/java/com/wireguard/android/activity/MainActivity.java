@@ -90,26 +90,25 @@ public class MainActivity extends BaseActivity
 
     @Override
     public boolean onOptionsItemSelected(final MenuItem item) {
-        switch (item.getItemId()) {
-            case android.R.id.home:
-                // The back arrow in the action bar should act the same as the back button.
-                onBackPressed();
-                return true;
-            case R.id.menu_action_edit:
-                getSupportFragmentManager().beginTransaction()
-                        .replace(R.id.detail_container, new TunnelEditorFragment())
-                        .setTransition(FragmentTransaction.TRANSIT_FRAGMENT_FADE)
-                        .addToBackStack(null)
-                        .commit();
-                return true;
-            case R.id.menu_action_save:
-                // This menu item is handled by the editor fragment.
-                return false;
-            case R.id.menu_settings:
-                startActivity(new Intent(this, SettingsActivity.class));
-                return true;
-            default:
-                return super.onOptionsItemSelected(item);
+        if(item.getItemId() == android.R.id.home) {
+            // The back arrow in the action bar should act the same as the back button.
+            onBackPressed();
+            return true;
+        } else if(item.getItemId() == R.id.menu_action_edit) {
+            getSupportFragmentManager().beginTransaction()
+                    .replace(R.id.detail_container, new TunnelEditorFragment())
+                    .setTransition(FragmentTransaction.TRANSIT_FRAGMENT_FADE)
+                    .addToBackStack(null)
+                    .commit();
+            return true;
+        } else if(item.getItemId() == R.id.menu_action_save) {
+            // This menu item is handled by the editor fragment.
+            return false;
+        } else if(item.getItemId() == R.id.menu_settings) {
+            startActivity(new Intent(this, SettingsActivity.class));
+            return true;
+        } else {
+            return super.onOptionsItemSelected(item);
         }
     }
 

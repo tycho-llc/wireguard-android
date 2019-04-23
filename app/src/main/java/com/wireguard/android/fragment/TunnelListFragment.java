@@ -381,34 +381,33 @@ public class TunnelListFragment extends BaseFragment {
 
         @Override
         public boolean onActionItemClicked(final ActionMode mode, final MenuItem item) {
-            switch (item.getItemId()) {
-                case R.id.menu_action_delete:
-                    final Iterable<Integer> copyCheckedItems = new HashSet<>(checkedItems);
-                    Application.getTunnelManager().getTunnels().thenAccept(tunnels -> {
-                        final Collection<Tunnel> tunnelsToDelete = new ArrayList<>();
-                        for (final Integer position : copyCheckedItems)
-                            tunnelsToDelete.add(tunnels.get(position));
+            if(item.getItemId() == R.id.menu_action_delete) {
+                final Iterable<Integer> copyCheckedItems = new HashSet<>(checkedItems);
+                Application.getTunnelManager().getTunnels().thenAccept(tunnels -> {
+                    final Collection<Tunnel> tunnelsToDelete = new ArrayList<>();
+                    for (final Integer position : copyCheckedItems)
+                        tunnelsToDelete.add(tunnels.get(position));
 
-                        final CompletableFuture[] futures = StreamSupport.stream(tunnelsToDelete)
-                                .map(Tunnel::delete)
-                                .toArray(CompletableFuture[]::new);
-                        CompletableFuture.allOf(futures)
-                                .thenApply(x -> futures.length)
-                                .whenComplete(TunnelListFragment.this::onTunnelDeletionFinished);
+                    final CompletableFuture[] futures = StreamSupport.stream(tunnelsToDelete)
+                            .map(Tunnel::delete)
+                            .toArray(CompletableFuture[]::new);
+                    CompletableFuture.allOf(futures)
+                            .thenApply(x -> futures.length)
+                            .whenComplete(TunnelListFragment.this::onTunnelDeletionFinished);
 
-                    });
-                    checkedItems.clear();
-                    mode.finish();
-                    return true;
-                case R.id.menu_action_select_all:
-                    Application.getTunnelManager().getTunnels().thenAccept(tunnels -> {
-                        for (int i = 0; i < tunnels.size(); ++i) {
-                            setItemChecked(i, true);
-                        }
-                    });
-                    return true;
-                default:
-                    return false;
+                });
+                checkedItems.clear();
+                mode.finish();
+                return true;
+            } else if(item.getItemId() == R.id.menu_action_select_all) {
+                Application.getTunnelManager().getTunnels().thenAccept(tunnels -> {
+                    for (int i = 0; i < tunnels.size(); ++i) {
+                        setItemChecked(i, true);
+                    }
+                });
+                return true;
+            } else {
+                return false;
             }
         }
 

@@ -132,38 +132,37 @@ public class TunnelEditorFragment extends BaseFragment implements AppExclusionLi
 
     @Override
     public boolean onOptionsItemSelected(final MenuItem item) {
-        switch (item.getItemId()) {
-            case R.id.menu_action_save:
-                if (binding == null)
-                    return false;
-                final Config newConfig;
-                try {
-                    newConfig = binding.getConfig().resolve();
-                } catch (final Exception e) {
-                    final String error = ErrorMessages.get(e);
-                    final String tunnelName = tunnel == null ? binding.getName() : tunnel.getName();
-                    final String message = getString(R.string.config_save_error, tunnelName, error);
-                    Log.e(TAG, message, e);
-                    Snackbar.make(binding.mainContainer, error, Snackbar.LENGTH_LONG).show();
-                    return false;
-                }
-                if (tunnel == null) {
-                    Log.d(TAG, "Attempting to create new tunnel " + binding.getName());
-                    final TunnelManager manager = Application.getTunnelManager();
-                    manager.create(binding.getName(), newConfig)
-                            .whenComplete(this::onTunnelCreated);
-                } else if (!tunnel.getName().equals(binding.getName())) {
-                    Log.d(TAG, "Attempting to rename tunnel to " + binding.getName());
-                    tunnel.setName(binding.getName())
-                            .whenComplete((a, b) -> onTunnelRenamed(tunnel, newConfig, b));
-                } else {
-                    Log.d(TAG, "Attempting to save config of " + tunnel.getName());
-                    tunnel.setConfig(newConfig)
-                            .whenComplete((a, b) -> onConfigSaved(tunnel, b));
-                }
-                return true;
-            default:
-                return super.onOptionsItemSelected(item);
+        if(item.getItemId() == R.id.menu_action_save) {
+            if (binding == null)
+                return false;
+            final Config newConfig;
+            try {
+                newConfig = binding.getConfig().resolve();
+            } catch (final Exception e) {
+                final String error = ErrorMessages.get(e);
+                final String tunnelName = tunnel == null ? binding.getName() : tunnel.getName();
+                final String message = getString(R.string.config_save_error, tunnelName, error);
+                Log.e(TAG, message, e);
+                Snackbar.make(binding.mainContainer, error, Snackbar.LENGTH_LONG).show();
+                return false;
+            }
+            if (tunnel == null) {
+                Log.d(TAG, "Attempting to create new tunnel " + binding.getName());
+                final TunnelManager manager = Application.getTunnelManager();
+                manager.create(binding.getName(), newConfig)
+                        .whenComplete(this::onTunnelCreated);
+            } else if (!tunnel.getName().equals(binding.getName())) {
+                Log.d(TAG, "Attempting to rename tunnel to " + binding.getName());
+                tunnel.setName(binding.getName())
+                        .whenComplete((a, b) -> onTunnelRenamed(tunnel, newConfig, b));
+            } else {
+                Log.d(TAG, "Attempting to save config of " + tunnel.getName());
+                tunnel.setConfig(newConfig)
+                        .whenComplete((a, b) -> onConfigSaved(tunnel, b));
+            }
+            return true;
+        } else {
+            return super.onOptionsItemSelected(item);
         }
     }
 
